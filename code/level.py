@@ -4,7 +4,8 @@ from tile import Tile
 from player import Player
 from debug import debug
 from os.path import dirname, join
-from support import import_csv_layout
+from support import *
+from random import choice
 
 dir_name = dirname(__file__)
 
@@ -25,8 +26,17 @@ class Level:
 
     def create_map(self):
         layouts = {
-            'boundary': import_csv_layout(join(dir_name, '../map/map_FloorBlocks.csv'))
+            'boundary': import_csv_layout(join(dir_name, '../map/map_FloorBlocks.csv')),
+            'grass': import_csv_layout(join(dir_name, '../map/map_Grass.csv')),
+            'object': import_csv_layout(join(dir_name, '../map/map_LargeObjects.csv'))
+
         }
+
+        graphics = {
+            'grass': import_folder(join(dir_name, '../graphics/grass')),
+            'objects': import_folder(join(dir_name, '../graphics/objects'))
+        }
+
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, col in enumerate(row):
@@ -34,8 +44,15 @@ class Level:
                         x = col_index * TILE_SIZE
                         y = row_index * TILE_SIZE
                         if style == 'boundary':
-                            Tile((x, y), [self.obstacle_sprites], 'invisible')
-        self.player = Player((2000, 1500), [self.visible_sprites], self.obstacle_sprites)
+                            Tile((x, y), (self.obstacle_sprites,), 'invisible')
+                        if style == 'grass':
+                            random_grass_img = choice(graphics['grass'])
+                            Tile((x, y), (self.visible_sprites, self.obstacle_sprites), 'grass', random_grass_img)
+                        if style == 'object':
+                            surf = graphics['objects'][int(col)]
+                            Tile((x, y), (self.visible_sprites, self.obstacle_sprites), 'grass', surf)
+
+        self.player = Player((2000, 1500), (self.visible_sprites,), self.obstacle_sprites)
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
