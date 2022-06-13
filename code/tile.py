@@ -10,3 +10,4 @@ class Tile(pg.sprite.Sprite):
         super().__init__(groups)
         self.image = pg.image.load(join(dir_name, '../graphics/test/rock.png')).convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
+        self.hitbox = self.rect.inflate(0, -10)
