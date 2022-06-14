@@ -7,6 +7,7 @@ from os.path import dirname, join
 from support import *
 from random import choice
 from weapon import Weapon
+from ui import UI
 
 dir_name = dirname(__file__)
 
@@ -23,7 +24,11 @@ class Level:
         # Attack sprites
         self.current_attack = None
 
+        # Player
         self.player = None
+
+        # User interface
+        self.ui = UI()
 
         # Sprite setup
         self.create_map()
@@ -73,6 +78,7 @@ class Level:
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
+        self.ui.display(self.player)
 
 
 class YSortCameraGroup(pg.sprite.Group):
