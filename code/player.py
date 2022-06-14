@@ -1,12 +1,13 @@
 import pygame as pg
 from os.path import dirname, join
 from support import import_folder
+from settings import weapon_data
 
 dir_name = dirname(__file__)
 
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, pos, groups, obstacles):
+    def __init__(self, pos, groups, obstacles, create_attack, destroy_attack):
         super().__init__(groups)
         self.image = pg.image.load(join(dir_name, '../graphics/test/player.png')).convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
@@ -25,6 +26,13 @@ class Player(pg.sprite.Sprite):
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_time = None
+
+        # Player weapons
+        self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
+
+        self.weapon_index = 0
+        self.weapon = list(weapon_data.keys())[self.weapon_index]
 
         self.obstacles = obstacles
 
@@ -67,6 +75,7 @@ class Player(pg.sprite.Sprite):
             if keys[pg.K_SPACE]:
                 self.attacking = True
                 self.attack_time = pg.time.get_ticks()
+                self.create_attack()
 
             # Magic input
             if keys[pg.K_LSHIFT]:
@@ -126,6 +135,7 @@ class Player(pg.sprite.Sprite):
         if self.attacking:
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.attacking = False
+                self.destroy_attack()
 
     def animate(self):
         animation = self.animations[self.status]
