@@ -11,7 +11,7 @@ class Weapon(pg.sprite.Sprite):
         direction = player.status.split('_')[0]
 
         # Graphic
-        full_path = join(dir_name, f'../graphics/weapons/{player.weapon}/{direction}.png')
+        full_path = join(dir_name, f'../graphics/weapons/{player.weapons[player.weapon_index]}/{direction}.png')
         self.image = pg.image.load(full_path).convert_alpha()
 
         # Weapon placement
