@@ -1,5 +1,8 @@
 import pygame as pg
 from settings import *
+from os.path import dirname, join
+
+dir_name = dirname(__file__)
 
 
 class UI:
@@ -11,6 +14,13 @@ class UI:
         # Bar setup
         self.health_bar_rect = pg.Rect(10, 10, HEALTH_BAR_WIDTH, BAR_HEIGHT)
         self.energy_bar_rect = pg.Rect(10, 34, ENERGY_BAR_WIDTH, BAR_HEIGHT)
+
+        # Weapons
+        self.weapon_graphics = []
+        for weapon in weapon_data.values():
+            path = weapon['graphic']
+            weapon = pg.image.load(join(dir_name, path))
+            self.weapon_graphics.append(weapon)
 
     def show_bar(self, current, max_amount, bg_rect, color):
         pg.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
@@ -32,6 +42,23 @@ class UI:
         self.display_surface.blit(text_surf, text_rect)
         pg.draw.rect(self.display_surface, UI_BORDER_COLOR, text_rect.inflate(20, 20), 3)
 
+    def selection_box(self, left, top, has_switched):
+        bg_rect = pg.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
+        pg.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
+        if has_switched:
+            pg.draw.rect(self.display_surface, UI_BORDER_COLOR_ACTIVE, bg_rect, 3)
+        else:
+            pg.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect)
+
+        return bg_rect
+
+    def weapon_overlay(self, weapon_index, has_switched):
+        weapon_surf = self.weapon_graphics[weapon_index]
+        bg_rect = self.selection_box(10, 630, has_switched)  # Weapon
+        weapon_rect = weapon_surf.get_rect(center=bg_rect.center)
+
+        self.display_surface.blit(weapon_surf, weapon_rect)
+
     def display(self, player):
         # Display health/energy bars
         self.show_bar(player.health, player.stats['health'], self.health_bar_rect, HEALTH_COLOR)
@@ -39,3 +66,7 @@ class UI:
 
         # Display player experience
         self.show_exp(player.exp)
+
+        # Display current weapon and magic player has equipped
+        self.weapon_overlay(player.weapon_index, not player.can_switch_weapon)
+        # self.selection_box(80, 635)
