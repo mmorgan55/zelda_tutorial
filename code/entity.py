@@ -4,6 +4,9 @@ import pygame as pg
 class Entity(pg.sprite.Sprite):
     def __init__(self, groups):
         super().__init__(groups)
+        self.frame_index = 0
+        self.animation_speed = 0.15
+        self.direction = pg.math.Vector2(0, 0)
 
     def move(self, speed):
         if self.direction.magnitude() != 0:
