@@ -9,7 +9,7 @@ dir_name = dirname(__file__)
 
 class Enemy(Entity):
     def __init__(self, monster_name, pos, groups, obstacles):
-        super().__init__(groups)
+        super().__init__(groups, obstacles)
         self.sprite_type = 'enemy'
 
         # Graphics setup
@@ -35,6 +35,11 @@ class Enemy(Entity):
         self.notice_radius = monster_info['notice_radius']
         self.attack_type = monster_info['attack_type']
 
+        # Player interaction
+        self.can_attack = True
+        self.attack_time = None
+        self.attack_cooldown = 400
+
     def import_enemy_assets(self, name):
         self.animations = {'idle': [], 'move': [], 'attack': []}
         main_path = join(dir_name, f'../graphics/monsters/{name}/')
@@ -56,7 +61,9 @@ class Enemy(Entity):
     def get_status(self, player):
         distance = self.get_player_distance_direction(player)[0]
 
-        if distance <= self.attack_radius:
+        if distance <= self.attack_radius and self.can_attack:
+            if self.status != 'attack':
+                self.frame_index = 0
             self.status = 'attack'
         elif distance <= self.notice_radius:
             self.status = 'move'
@@ -65,14 +72,32 @@ class Enemy(Entity):
 
     def actions(self, player):
         if self.status == 'attack':
-            pass
+            self.attack_time = pg.time.get_ticks()
         elif self.status == 'move':
             self.direction = self.get_player_distance_direction(player)[1]
         else:
-            self.status = pg.math.Vector2()
+            self.direction = pg.math.Vector2()
+
+    def animate_enemy(self):
+        animation = self.animations[self.status]
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(animation):
+            if self.status == 'attack':
+                self.can_attack = False
+            self.frame_index = 0
+        self.image = animation[int(self.frame_index)]
+        self.rect = self.image.get_rect(center=self.hitbox.center)
+
+    def get_attack_cooldown(self):
+        if not self.can_attack:
+            current_time = pg.time.get_ticks()
+            if current_time - self.attack_time >= self.attack_cooldown:
+                self.can_attack = True
 
     def update(self):
         self.move(self.speed)
+        self.animate_enemy()
+        self.get_attack_cooldown()
 
     def enemy_update(self, player):
         self.get_status(player)

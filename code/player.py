@@ -9,7 +9,7 @@ dir_name = dirname(__file__)
 
 class Player(Entity):
     def __init__(self, pos, groups, obstacles, create_attack, destroy_attack, create_magic, destroy_magic):
-        super().__init__(groups)
+        super().__init__(groups, obstacles)
         self.image = pg.image.load(join(dir_name, '../graphics/test/player.png')).convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -26)
@@ -150,9 +150,8 @@ class Player(Entity):
             if current_time - self.magic_switch_time >= self.switch_duration_cooldown:
                 self.can_switch_magic = True
 
-    def animate(self):
+    def animate_player(self):
         animation = self.animations[self.status]
-
         self.frame_index += self.animation_speed
 
         if self.frame_index > len(animation):
@@ -165,5 +164,5 @@ class Player(Entity):
         self.input()
         self.cooldowns()
         self.get_status()
-        self.animate()
+        self.animate_player()
         self.move(self.speed)
