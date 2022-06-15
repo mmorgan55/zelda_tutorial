@@ -15,12 +15,19 @@ class UI:
         self.health_bar_rect = pg.Rect(10, 10, HEALTH_BAR_WIDTH, BAR_HEIGHT)
         self.energy_bar_rect = pg.Rect(10, 34, ENERGY_BAR_WIDTH, BAR_HEIGHT)
 
-        # Weapons
+        # Weapons graphics
         self.weapon_graphics = []
         for weapon in weapon_data.values():
             path = weapon['graphic']
-            weapon = pg.image.load(join(dir_name, path))
+            weapon = pg.image.load(join(dir_name, path)).convert_alpha()
             self.weapon_graphics.append(weapon)
+
+        # Magic graphics
+        self.magic_graphics = []
+        for magic in magic_data.values():
+            path = magic['graphic']
+            magic = pg.image.load(join(dir_name, path)).convert_alpha()
+            self.magic_graphics.append(magic)
 
     def show_bar(self, current, max_amount, bg_rect, color):
         pg.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
@@ -48,7 +55,7 @@ class UI:
         if has_switched:
             pg.draw.rect(self.display_surface, UI_BORDER_COLOR_ACTIVE, bg_rect, 3)
         else:
-            pg.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect)
+            pg.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
         return bg_rect
 
@@ -58,6 +65,13 @@ class UI:
         weapon_rect = weapon_surf.get_rect(center=bg_rect.center)
 
         self.display_surface.blit(weapon_surf, weapon_rect)
+
+    def magic_overlay(self, magic_index, has_switched):
+        bg_rect = self.selection_box(80, 635, has_switched)
+        magic_surf = self.magic_graphics[magic_index]
+        magic_rect = magic_surf.get_rect(center=bg_rect.center)
+
+        self.display_surface.blit(magic_surf, magic_rect)
 
     def display(self, player):
         # Display health/energy bars
@@ -69,4 +83,4 @@ class UI:
 
         # Display current weapon and magic player has equipped
         self.weapon_overlay(player.weapon_index, not player.can_switch_weapon)
-        # self.selection_box(80, 635)
+        self.magic_overlay(player.magic_index, not player.can_switch_magic)

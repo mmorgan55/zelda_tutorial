@@ -2,11 +2,12 @@ import pygame as pg
 from os.path import dirname, join
 from support import import_folder
 from settings import weapon_data, magic_data
+from entity import Entity
 
 dir_name = dirname(__file__)
 
 
-class Player(pg.sprite.Sprite):
+class Player(Entity):
     def __init__(self, pos, groups, obstacles, create_attack, destroy_attack, create_magic, destroy_magic):
         super().__init__(groups)
         self.image = pg.image.load(join(dir_name, '../graphics/test/player.png')).convert_alpha()
@@ -135,33 +136,6 @@ class Player(pg.sprite.Sprite):
         else:
             if 'attack' in self.status:
                 self.status = self.status.replace('_attack', '')
-
-    def move(self, speed):
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-
-        self.hitbox.x += self.direction.x * speed
-        self.check_collisions('horizontal')
-        self.hitbox.y += self.direction.y * speed
-        self.check_collisions('vertical')
-        self.rect.center = self.hitbox.center
-
-    def check_collisions(self, direction):
-        if direction == 'horizontal':
-            for sprite in self.obstacles:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.x > 0:  # Moving left
-                        self.hitbox.right = sprite.hitbox.left
-                    if self.direction.x < 0:  # Moving right
-                        self.hitbox.left = sprite.hitbox.right
-
-        if direction == 'vertical':
-            for sprite in self.obstacles:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.y > 0:  # Moving down
-                        self.hitbox.bottom = sprite.hitbox.top
-                    if self.direction.y < 0:  # Moving  up
-                        self.hitbox.top = sprite.hitbox.bottom
 
     def cooldowns(self):
         current_time = pg.time.get_ticks()
