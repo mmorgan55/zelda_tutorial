@@ -8,7 +8,7 @@ dir_name = dirname(__file__)
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles, damage_player):
+    def __init__(self, monster_name, pos, groups, obstacles, damage_player, trigger_death_particles):
         super().__init__(groups, obstacles)
         self.sprite_type = 'enemy'
 
@@ -45,6 +45,9 @@ class Enemy(Entity):
         self.vulnerable = True
         self.hit_time = None
         self.invincibility_duration = 300
+
+        # Particle effects
+        self.trigger_death_particles = trigger_death_particles
 
     def import_enemy_assets(self, name):
         self.animations = {'idle': [], 'move': [], 'attack': []}
@@ -132,6 +135,7 @@ class Enemy(Entity):
     def check_death(self):
         if self.health <= 0:
             self.kill()
+            self.trigger_death_particles(self.rect.center, self.monster_name)
 
     def update(self):
         self.hit_reaction()
