@@ -8,7 +8,7 @@ dir_name = dirname(__file__)
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles):
+    def __init__(self, monster_name, pos, groups, obstacles, damage_player):
         super().__init__(groups, obstacles)
         self.sprite_type = 'enemy'
 
@@ -39,6 +39,12 @@ class Enemy(Entity):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 400
+        self.damage_player = damage_player
+
+        # Invincibility timer
+        self.vulnerable = True
+        self.hit_time = None
+        self.invincibility_duration = 300
 
     def import_enemy_assets(self, name):
         self.animations = {'idle': [], 'move': [], 'attack': []}
@@ -73,6 +79,7 @@ class Enemy(Entity):
     def actions(self, player):
         if self.status == 'attack':
             self.attack_time = pg.time.get_ticks()
+            self.damage_player(self.attack_damage, self.attack_type)
         elif self.status == 'move':
             self.direction = self.get_player_distance_direction(player)[1]
         else:
@@ -88,27 +95,49 @@ class Enemy(Entity):
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
-    def get_attack_cooldown(self):
+        if not self.vulnerable:
+            # Flicker when invincible
+            alpha = self.flicker_entity()
+            self.image.set_alpha(alpha)
+        else:
+            # Reset alpha once enemy is no longer invincible
+            alpha = 255
+            self.image.set_alpha(alpha)
+
+    def get_cooldowns(self):
+        current_time = pg.time.get_ticks()
         if not self.can_attack:
-            current_time = pg.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
 
+        if not self.vulnerable:
+            if current_time - self.hit_time >= self.invincibility_duration:
+                self.vulnerable = True
+
     def get_damage(self, player, attack_type):
-        if attack_type == 'weapon':
-            self.health -= player.get_full_weapon_damage()
-        else:
-            pass
-            # Magic damage
+        if self.vulnerable:
+            self.direction = self.get_player_distance_direction(player)[1]
+            if attack_type == 'weapon':
+                self.health -= player.get_full_weapon_damage()
+            else:
+                pass
+                # Magic damage
+            self.hit_time = pg.time.get_ticks()
+            self.vulnerable = False
+
+    def hit_reaction(self):
+        if not self.vulnerable:
+            self.direction *= -self.resistance
 
     def check_death(self):
         if self.health <= 0:
             self.kill()
 
     def update(self):
+        self.hit_reaction()
         self.move(self.speed)
         self.animate_enemy()
-        self.get_attack_cooldown()
+        self.get_cooldowns()
         self.check_death()
 
     def enemy_update(self, player):

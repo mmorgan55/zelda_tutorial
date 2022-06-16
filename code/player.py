@@ -49,6 +49,11 @@ class Player(Entity):
         self.speed = self.stats['speed']
         self.exp = 123
 
+        # Damage timer
+        self.vulnerable = True
+        self.hurt_time = None
+        self.invincibility_duration = 500
+
         self.obstacles = obstacles
 
     def import_player_assets(self):
@@ -150,6 +155,10 @@ class Player(Entity):
             if current_time - self.magic_switch_time >= self.switch_duration_cooldown:
                 self.can_switch_magic = True
 
+        if not self.vulnerable:
+            if current_time - self.hurt_time >= self.invincibility_duration:
+                self.vulnerable = True
+
     def animate_player(self):
         animation = self.animations[self.status]
         self.frame_index += self.animation_speed
@@ -160,10 +169,18 @@ class Player(Entity):
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
+        if not self.vulnerable:
+            # Flicker when invincible
+            alpha = self.flicker_entity()
+            self.image.set_alpha(alpha)
+        else:
+            # Reset alpha once player is no longer invincible
+            alpha = 255
+            self.image.set_alpha(alpha)
+
     def get_full_weapon_damage(self):
         base_damage = self.stats['attack']
         weapon_damage = weapon_data[self.current_weapon]['damage']
-        print(base_damage + weapon_damage)
         return base_damage + weapon_damage
 
     def update(self):

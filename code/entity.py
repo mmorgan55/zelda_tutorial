@@ -1,4 +1,5 @@
 import pygame as pg
+from math import sin
 
 
 class Entity(pg.sprite.Sprite):
@@ -36,3 +37,10 @@ class Entity(pg.sprite.Sprite):
                         self.hitbox.bottom = sprite.hitbox.top
                     if self.direction.y < 0:  # Moving  up
                         self.hitbox.top = sprite.hitbox.bottom
+
+    def flicker_entity(self):
+        value = sin(pg.time.get_ticks())
+        if value >= 0:
+            return 255
+        else:
+            return 0
