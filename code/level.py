@@ -2,7 +2,6 @@ import pygame as pg
 from settings import *
 from tile import Tile
 from player import Player
-from debug import debug
 from os.path import dirname, join
 from support import *
 from random import choice
@@ -24,6 +23,8 @@ class Level:
 
         # Attack sprites
         self.current_attack = None
+        self.attack_sprites = pg.sprite.Group()
+        self.attackable_sprites = pg.sprite.Group()
 
         # Player
         self.player = None
@@ -57,7 +58,9 @@ class Level:
                             Tile((x, y), (self.obstacle_sprites,), 'invisible')
                         if style == 'grass':
                             random_grass_img = choice(graphics['grass'])
-                            Tile((x, y), (self.visible_sprites, self.obstacle_sprites), 'grass', random_grass_img)
+                            Tile((x, y),
+                                 (self.visible_sprites, self.obstacle_sprites, self.attackable_sprites),
+                                 'grass', random_grass_img)
                         if style == 'object':
                             surf = graphics['objects'][int(col)]
                             Tile((x, y), (self.visible_sprites, self.obstacle_sprites), 'grass', surf)
@@ -79,10 +82,12 @@ class Level:
                                     monster_name = 'raccoon'
                                 else:
                                     monster_name = 'squid'
-                                Enemy(monster_name, (x, y), (self.visible_sprites,), self.obstacle_sprites)
+                                Enemy(monster_name, (x, y),
+                                      (self.visible_sprites, self.attackable_sprites),
+                                      self.obstacle_sprites)
 
     def create_attack(self):
-        self.current_attack = Weapon(self.player, (self.visible_sprites,))
+        self.current_attack = Weapon(self.player, (self.visible_sprites, self.attack_sprites))
 
     def destroy_attack(self):
         if self.current_attack:
@@ -97,10 +102,23 @@ class Level:
     def destroy_magic(self):
         pass
 
+    def player_attack(self):
+        if self.attack_sprites:
+            for attack_sprite in self.attack_sprites:
+                collision_sprites = pg.sprite.spritecollide(attack_sprite, self.attackable_sprites, False)
+                if collision_sprites:
+                    for target_sprite in collision_sprites:
+                        if target_sprite.sprite_type == 'grass':
+                            target_sprite.kill()
+                        else:
+                            target_sprite.get_damage(self.player, attack_sprite.sprite_type)
+
+
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.update_enemy(self.player)
+        self.player_attack()
         self.ui.display(self.player)
 
 
