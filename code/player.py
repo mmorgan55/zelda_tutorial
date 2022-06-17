@@ -190,6 +190,12 @@ class Player(Entity):
         spell_damage = magic_data[self.current_magic]['strength']
         return base_damage+spell_damage
 
+    def get_current_stat_value(self, index):
+        return list(self.stats.values())[index]
+
+    def get_stat_upgrade_cost(self, index):
+        return list(self.upgrade_cost.values())[index]
+
     def recover_energy(self):
         if self.energy < self.stats['energy']:
             self.energy += 0.01 * self.stats['magic']
@@ -201,5 +207,5 @@ class Player(Entity):
         self.cooldowns()
         self.get_status()
         self.animate_player()
-        self.move(self.speed)
+        self.move(self.stats['speed'])
         self.recover_energy()

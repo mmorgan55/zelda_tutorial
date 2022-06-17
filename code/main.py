@@ -20,6 +20,10 @@ class Game:
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_m:
+                        self.level.toggle_upgrade_menu()
+
 
             self.screen.fill('grey')
             self.level.run()

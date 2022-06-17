@@ -10,6 +10,7 @@ from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
 from magic import MagicPlayer
+from upgrade import Upgrade
 
 dir_name = dirname(__file__)
 
@@ -18,6 +19,7 @@ class Level:
     def __init__(self):
         # Get display surface
         self.display_surface = pg.display.get_surface()
+        self.game_paused = False
 
         # Sprite group setup
         self.visible_sprites = YSortCameraGroup()
@@ -35,11 +37,12 @@ class Level:
         self.animation_player = AnimationPlayer()
         self.magic_player = MagicPlayer(self.animation_player)
 
-        # User interface
-        self.ui = UI()
-
         # Sprite setup
         self.create_map()
+
+        # User interface
+        self.ui = UI()
+        self.upgrade = Upgrade(self.player)
 
     def create_map(self):
         layouts = {
@@ -136,12 +139,19 @@ class Level:
     def give_player_exp(self, amount):
         self.player.exp += amount
 
+    def toggle_upgrade_menu(self):
+        self.game_paused = not self.game_paused
+
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
-        self.visible_sprites.update_enemy(self.player)
-        self.player_attack()
         self.ui.display(self.player)
+
+        if self.game_paused:
+            self.upgrade.display()
+        else:
+            self.visible_sprites.update()
+            self.visible_sprites.update_enemy(self.player)
+            self.player_attack()
 
 
 class YSortCameraGroup(pg.sprite.Group):
