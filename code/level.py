@@ -77,8 +77,7 @@ class Level:
                                                      self.obstacle_sprites,
                                                      self.create_attack,
                                                      self.destroy_attack,
-                                                     self.create_magic,
-                                                     self.destroy_magic)
+                                                     self.create_magic)
                             else:
                                 if col == '390':
                                     monster_name = 'bamboo'
@@ -106,10 +105,7 @@ class Level:
         if style == 'heal':
             self.magic_player.heal(self.player, strength, cost, (self.visible_sprites,))
         if style == 'flame':
-            pass
-
-    def destroy_magic(self):
-        pass
+            self.magic_player.flame(self.player, cost, (self.visible_sprites, self.attack_sprites))
 
     def player_attack(self):
         if self.attack_sprites:

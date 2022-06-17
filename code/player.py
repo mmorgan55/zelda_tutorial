@@ -8,7 +8,7 @@ dir_name = dirname(__file__)
 
 
 class Player(Entity):
-    def __init__(self, pos, groups, obstacles, create_attack, destroy_attack, create_magic, destroy_magic):
+    def __init__(self, pos, groups, obstacles, create_attack, destroy_attack, create_magic):
         super().__init__(groups, obstacles)
         self.image = pg.image.load(join(dir_name, '../graphics/test/player.png')).convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
@@ -182,6 +182,11 @@ class Player(Entity):
         base_damage = self.stats['attack']
         weapon_damage = weapon_data[self.current_weapon]['damage']
         return base_damage + weapon_damage
+
+    def get_full_magic_damage(self):
+        base_damage = self.stats['magic']
+        spell_damage = magic_data[self.current_magic]['strength']
+        return base_damage+spell_damage
 
     def recover_energy(self):
         if self.energy < self.stats['energy']:
