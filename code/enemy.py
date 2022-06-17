@@ -8,7 +8,7 @@ dir_name = dirname(__file__)
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles, damage_player, trigger_death_particles):
+    def __init__(self, monster_name, pos, groups, obstacles, damage_player, trigger_death_particles, give_player_exp):
         super().__init__(groups, obstacles)
         self.sprite_type = 'enemy'
 
@@ -40,6 +40,7 @@ class Enemy(Entity):
         self.attack_time = None
         self.attack_cooldown = 400
         self.damage_player = damage_player
+        self.give_player_exp = give_player_exp
 
         # Invincibility timer
         self.vulnerable = True
@@ -135,6 +136,7 @@ class Enemy(Entity):
         if self.health <= 0:
             self.kill()
             self.trigger_death_particles(self.rect.center, self.monster_name)
+            self.give_player_exp(self.exp)
 
     def update(self):
         self.hit_reaction()
