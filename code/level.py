@@ -9,6 +9,7 @@ from weapon import Weapon
 from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
+from magic import MagicPlayer
 
 dir_name = dirname(__file__)
 
@@ -32,6 +33,7 @@ class Level:
 
         # Particles
         self.animation_player = AnimationPlayer()
+        self.magic_player = MagicPlayer(self.animation_player)
 
         # User interface
         self.ui = UI()
@@ -101,9 +103,10 @@ class Level:
         self.current_attack = None
 
     def create_magic(self, style, strength, cost):
-        print(style)
-        print(cost)
-        print(strength)
+        if style == 'heal':
+            self.magic_player.heal(self.player, strength, cost, (self.visible_sprites,))
+        if style == 'flame':
+            pass
 
     def destroy_magic(self):
         pass

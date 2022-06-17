@@ -1,7 +1,7 @@
 import pygame as pg
 from support import import_folder
 from os.path import dirname, join
-from random import  choice
+from random import choice
 
 dir_name = dirname(__file__)
 
